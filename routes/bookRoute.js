@@ -1,4 +1,5 @@
 import express from "express";
+import { authorize, protect } from "../middleware/auth.js";
 import {
   getBooks,
   getBookById,
@@ -7,7 +8,7 @@ import {
   deleteBook,
 } from "../controller/bookController.js";
 const router = express.Router();
-
+router.use(protect, authorize("admin", "user"));
 /**
  * @swagger
  *  /api/books:

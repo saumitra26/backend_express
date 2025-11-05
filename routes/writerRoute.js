@@ -1,4 +1,5 @@
 import express from "express";
+import { protect, authorize } from "../middleware/auth.js";
 import {
   getAllWriter,
   getWriterById,
@@ -7,6 +8,7 @@ import {
   deleteWriter,
 } from "../controller/writerController.js";
 const router = express.Router();
+router.use(protect, authorize("admin"));
 /**
  * @swagger
  *  /api/writers:

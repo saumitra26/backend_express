@@ -1,14 +1,29 @@
-
 import swaggerJSDoc from "swagger-jsdoc";
 
 const options = {
-    definition: {
-        openapi: "3.0.0",
-        info: {
-            title: "Express Book library API",
-            version: "1.0.0"
-        }
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Express Book library API",
+      version: "1.0.0",
+        },
+    components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
     },
-    apis: ["./routes/*.js"]
+  },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+
+  },
+  
+  apis: ["./routes/*.js"],
 };
-export default swaggerJSDoc(options)
+export default swaggerJSDoc(options);
