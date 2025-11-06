@@ -51,3 +51,36 @@ export const deleteBookId = async (id) => {
   const [result] = await db.query("DELETE FROM book WHERE id=?", [id]);
   return result.affectedRows > 0 ? id : null;
 };
+export const getBookByFilter = async ({
+  limit ,
+  offset ,
+  search,
+  sortBy ,
+  order,
+  type,
+  writer_id,
+}) => {
+  let query = `SELECT * FROM book WHERE 1=1`;
+  const values = [];
+  if (type) {
+    query += ` AND type= ?`;
+    values.push(type);
+  }
+  if (writer_id) {
+    query += ` AND writer_id= ?`;
+    values.push(writer_id);
+  }
+
+  if (search) {
+    query += ` AND name LIKE ?`;
+    values.push(`%${search}%`);
+  }
+  // ✅ Validate sortBy / order (prevent SQL injection!)
+ 
+  query += ` ORDER BY ${sortBy} ${order} LIMIT ? OFFSET ?`;
+
+  values.push(Number(limit), Number(offset));
+
+  const [rows] = await db.query(query, values);
+  return rows;
+};

@@ -4,15 +4,16 @@ import {
   addNewBook,
   updateBookInfo,
   deleteBookId,
+  getBookByFilter
 } from "../model/bookModel.js";
-export const getBooks = async (req, res, next) => {
-  try {
-    const books = await findAllBooks();
-    res.status(200).json(books);
-  } catch (error) {
-    next(error);
-  }
-};
+// export const getBooks = async (req, res, next) => {
+//   try {
+//     const books = await findAllBooks();
+//     res.status(200).json(books);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 export const getBookById = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
@@ -96,6 +97,42 @@ export const deleteBook = async (req, res, next) => {
         .json({ success: true, message: "delete successful", id: deletedId });
     }
     return res.status(404).json({ message: `id ${id} not found` });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBooks = async (req, res, next) => {
+  try {
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+    const offset = (page - 1) * limit;
+    const search = req.query.search || null;
+    const sortBy = req.query.sortBy || "id";
+    const order = req.query.order === "DESC" ? "DESC" : "ASC";
+    const type = req.query.type || null;
+    const writer_id = req.query.writer_id || null;
+    const books = await getBookByFilter({
+      limit,
+      offset,
+      search,
+      sortBy,
+      order,
+      type,
+      writer_id,
+    });
+    if (!books) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    return res
+      .status(200)
+      .json({
+        message: "Book found",
+        message: "Books found",
+        page,
+        limit,
+        count: books.length,
+        data: books,
+      });
   } catch (error) {
     next(error);
   }

@@ -4,7 +4,7 @@ import { register, login } from "../controller/authController.js";
 const router = express.Router();
 /**
  * @swagger
- * /api/auth:
+ * /api/auth/register:
  *   post:
  *     summary: User register
  *     tags: [User]
@@ -25,7 +25,7 @@ const router = express.Router();
  *
  */
 
-router.post("/", register);
+router.post("/register", register);
 /**
  * @swagger
  * /api/auth/login:
