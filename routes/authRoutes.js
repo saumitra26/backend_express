@@ -1,5 +1,7 @@
 import express from "express";
 import { register, login } from "../controller/authController.js";
+import { validation } from "../middleware/validation.js";
+import { loginSchema } from "../valitation/authValidation.js";
 
 const router = express.Router();
 /**
@@ -15,6 +17,7 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
+ *               name: { type: string }
  *               email: { type: string }
  *               password: { type: string }
  *     responses:
@@ -25,7 +28,7 @@ const router = express.Router();
  *
  */
 
-router.post("/register", register);
+router.post("/register",  register);
 /**
  * @swagger
  * /api/auth/login:
@@ -73,6 +76,6 @@ router.post("/register", register);
  *                   type: string
  *                   example: Email already exists
  */
-router.post("/login", login);
+router.post("/login",validation(loginSchema), login);
 
 export default router;

@@ -87,6 +87,8 @@ router.use(protect, authorize("admin", "user"));
  *                         type: string
  *                       writer_id:
  *                         type: integer
+ *                       writer_name:
+ *                         type: string
  *                       price:
  *                         type: number
  *                       published_date:
@@ -122,7 +124,7 @@ router.get("/:id", getBookById);
  * @swagger
  * /api/books:
  *   post:
- *     summary: GEt books by id
+ *     summary: Post book
  *     tags: [Books]
  *     requestBody:
  *       required: true
@@ -170,6 +172,7 @@ router.post("/", addBook);
  *               type:  { type: string }
  *               description: { type: string }
  *               writer_id: { type: number, format: float }   
+ *               writer_name: { type: string }   
  *               price: { type: number }
  *               published_date: { type: string, format: date-type }
  *               total_sell: { type: number, format: float}

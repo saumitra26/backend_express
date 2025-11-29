@@ -4,7 +4,7 @@ import {
   addNewBook,
   updateBookInfo,
   deleteBookId,
-  getBookByFilter
+  getBookByFilter,
 } from "../model/bookModel.js";
 // export const getBooks = async (req, res, next) => {
 //   try {
@@ -37,13 +37,14 @@ export const addBook = async (req, res, next) => {
       type: data.type,
       description: data.description || "",
       writer_id: data.writer_id,
+      writer_name: data.writer_name,
       price: parseFloat(data.price),
       published_date: new Date(data.published_date),
       total_sell: data.total_sell || 0,
     };
-    const newId = await addNewBook(newBook);
-    if (newId) {
-      return res.status(201).json(newId);
+    const addedBook = await addNewBook(newBook);
+    if (addedBook) {
+      return res.status(201).json(addedBook);
     }
     res.status(400).json({ msg: "something wrong" });
   } catch (error) {
@@ -62,6 +63,7 @@ export const updateBook = async (req, res, next) => {
       type,
       description,
       writer_id,
+      writer_name,
       price,
       published_date,
       total_sell,
@@ -71,17 +73,22 @@ export const updateBook = async (req, res, next) => {
       type: type,
       description: description || "",
       writer_id: writer_id,
+      writer_name: writer_name,
       price: parseFloat(price),
       published_date: new Date(published_date),
       total_sell: parseFloat(total_sell) || 0.0,
     };
-    const updatedId = await updateBookInfo(id, bookInfo);
-    if (!updatedId) {
+    const updatedBook = await updateBookInfo(id, bookInfo);
+    if (!updatedBook) {
       res.status(404).json({ message: `id ${id} not found` });
     } else {
       res
         .status(200)
-        .json({ success: true, message: "update successful", id: updatedId });
+        .json({
+          success: true,
+          message: "update successful",
+          data: updatedBook,
+        });
     }
   } catch (error) {
     next(error);
@@ -103,7 +110,7 @@ export const deleteBook = async (req, res, next) => {
 };
 export const getBooks = async (req, res, next) => {
   try {
-    const limit = req.query.limit || 10;
+    const limit = req.query.limit || 100;
     const page = req.query.page || 1;
     const offset = (page - 1) * limit;
     const search = req.query.search || null;
@@ -123,16 +130,14 @@ export const getBooks = async (req, res, next) => {
     if (!books) {
       return res.status(404).json({ message: "Book not found" });
     }
-    return res
-      .status(200)
-      .json({
-        message: "Book found",
-        message: "Books found",
-        page,
-        limit,
-        count: books.length,
-        data: books,
-      });
+    return res.status(200).json({
+      message: "Book found",
+      message: "Books found",
+      page,
+      limit,
+      count: books.length,
+      data: books,
+    });
   } catch (error) {
     next(error);
   }

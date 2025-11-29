@@ -8,7 +8,7 @@ import {
   deleteWriter,
 } from "../controller/writerController.js";
 const router = express.Router();
-router.use(protect, authorize("admin"));
+router.use(protect, authorize("admin", "user"));
 /**
  * @swagger
  *  /api/writers:

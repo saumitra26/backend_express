@@ -18,18 +18,36 @@ export const addNewBook = async (bookDetails) => {
     type,
     description,
     writer_id,
+    writer_name,
     price,
     published_date,
     total_sell,
   } = bookDetails;
-  const [result] = await db.query(
-    "INSERT INTO  book(name,type,description,writer_id,price,published_date,total_sell) VALUES(?,?,?,?,?,?,?)",
-    [name, type, description, writer_id, price, published_date, total_sell]
-  );
-  if (result.insertId) {
-    return result.insertId;
+  try {
+    const [result] = await db.query(
+      "INSERT INTO  book(name,type,description,writer_id, writer_name,price,published_date,total_sell) VALUES(?,?,?,?,?,?,?,?)",
+      [
+        name,
+        type,
+        description,
+        writer_id,
+        writer_name,
+        price,
+        published_date,
+        total_sell,
+      ]
+    );
+    if (!result.insertId) return null;
+    //return result.insertId;
+    const [rows] = await db.query("SELECT * FROM book WHERE id=?", [
+      result.insertId,
+    ]);
+
+    return rows[0] || null;
+  } catch (err) {
+    console.error("Error inserting new book:", err);
+    throw err;
   }
-  return null;
 };
 export const updateBookInfo = async (id, bookDetails) => {
   const {
@@ -37,25 +55,29 @@ export const updateBookInfo = async (id, bookDetails) => {
     type,
     description,
     writer_id,
+    writer_name,
     price,
     published_date,
     total_sell,
   } = bookDetails;
   const [result] = await db.query(
-    "UPDATE book SET name=?,type=?,description=?,writer_id=?,price=?,published_date=?,total_sell=? WHERE id=?",
-    [name, type, description, writer_id, price, published_date, total_sell, id]
+    "UPDATE book SET name=?,type=?,description=?,writer_id=?, writer_name=?,price=?,published_date=?,total_sell=? WHERE id=?",
+    [name, type, description, writer_id, writer_name, price, published_date, total_sell, id]
   );
-  return result.affectedRows > 0 ? id : null;
+
+  if (result.affectedRows === 0) return null;
+  const [rows] = await db.query("SELECT * FROM book WHERE id=?", [id]);
+  return rows[0];
 };
 export const deleteBookId = async (id) => {
   const [result] = await db.query("DELETE FROM book WHERE id=?", [id]);
   return result.affectedRows > 0 ? id : null;
 };
 export const getBookByFilter = async ({
-  limit ,
-  offset ,
+  limit,
+  offset,
   search,
-  sortBy ,
+  sortBy,
   order,
   type,
   writer_id,
@@ -76,7 +98,7 @@ export const getBookByFilter = async ({
     values.push(`%${search}%`);
   }
   // ✅ Validate sortBy / order (prevent SQL injection!)
- 
+
   query += ` ORDER BY ${sortBy} ${order} LIMIT ? OFFSET ?`;
 
   values.push(Number(limit), Number(offset));

@@ -12,15 +12,16 @@ const privateKey = fs.readFileSync(
 );
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, name: user.name, email: user.email, role: user.role },
     privateKey,
     { algorithm: "RS256", expiresIn: "1h" }
   );
 };
 export const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
     const newUser = {
+      name: name,
       email: email,
       password: password,
     };
@@ -38,11 +39,12 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const result = await checkLogin(email);
 
-    if (!result.exists) return res.status(401).json({ message: "Invalid credentials" });
+    if (!result.exists)
+      return res.status(401).json({ message: "Invalid credentials" });
     const user = result.user;
     const isMatch = await bcrypt.compare(password, user.password);
     console.log("ee", isMatch);
-    
+
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }

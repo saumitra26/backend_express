@@ -1,7 +1,9 @@
 import db from "../config/db.js";
 import bcrypt from "bcryptjs";
 export const addUser = async (user) => {
-  const { email, password } = user;
+
+  const { name, email, password } = user;
+    
   const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [
     email,
   ]);
@@ -11,10 +13,10 @@ export const addUser = async (user) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
   const [result] = await db.query(
-    "INSERT INTO users(email, password) VALUES(?, ?)",
-    [email, hashedPassword]
+    "INSERT INTO users(name, email, password) VALUES(?, ?, ?)",
+    [name, email, hashedPassword]
   );
-
+console.log(result)
   return result.insertId > 0 ? result.insertId : null;
 };
 export const checkLogin = async (email) => {
