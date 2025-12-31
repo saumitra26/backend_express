@@ -23,15 +23,16 @@ export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    const newUser = { name, email, password };
-    const createdId = await addUser(newUser);
+    const result = await addUser({ name, email, password });
 
-    if (!createdId)
-      return res.status(400).json({ message: "Unsuccessful" });
+    if (result.exists) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
-    return res
-      .status(201)
-      .json({ message: "User registered successfully" });
+    return res.status(201).json({
+      message: "User registered successfully",
+      id: result.id
+    });
   } catch (error) {
     next(error);
   }
