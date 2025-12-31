@@ -1,15 +1,15 @@
 import { addUser, checkLogin } from "../model/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const privateKey = fs.readFileSync(
-  path.join(__dirname, "../config/keys/private.key"),
-  "utf-8"
-);
+
+/* Load PRIVATE key (used for signing tokens) */
+const privateKey = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+if (!privateKey) {
+  console.error("❌ JWT_PRIVATE_KEY is missing");
+}
+
+/* -------- Generate Token (SIGN) -------- */
 const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, name: user.name, email: user.email, role: user.role },
@@ -17,23 +17,27 @@ const generateToken = (user) => {
     { algorithm: "RS256", expiresIn: "1h" }
   );
 };
+
+/* -------- REGISTER -------- */
 export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    const newUser = {
-      name: name,
-      email: email,
-      password: password,
-    };
+
+    const newUser = { name, email, password };
     const createdId = await addUser(newUser);
-    if (!createdId) {
-      return res.status(404).json({ message: "Unsuccessful" });
-    }
-    return res.status(201).json({ message: "User registered successfully" });
+
+    if (!createdId)
+      return res.status(400).json({ message: "Unsuccessful" });
+
+    return res
+      .status(201)
+      .json({ message: "User registered successfully" });
   } catch (error) {
     next(error);
   }
 };
+
+/* -------- LOGIN -------- */
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -41,13 +45,13 @@ export const login = async (req, res, next) => {
 
     if (!result.exists)
       return res.status(401).json({ message: "Invalid credentials" });
+
     const user = result.user;
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("ee", isMatch);
 
-    if (!isMatch) {
+    if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
-    }
+
     const token = generateToken(user);
 
     res.json({ token });
