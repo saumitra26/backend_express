@@ -1,38 +1,44 @@
 import db from "../config/db.js";
 import bcrypt from "bcryptjs";
-export const addUser = async (user) => {
 
-  const { name, email, password } = user;
-    
-  const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [
-    email,
-  ]);
-if (existing.length > 0)
-  return { exists: true };
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const [result] = await db.query(
-    "INSERT INTO users(name, email, password) VALUES(?, ?, ?)",
-    [name, email, hashedPassword]
+/* -------- REGISTER (DB) -------- */
+export const addUser = async ({ name, email, password }) => {
+  const [existing] = await db.query(
+    "SELECT id FROM users WHERE email = ?",
+    [email]
   );
-console.log(result)
-  return result.insertId > 0 ? result.insertId : null;
-};
-export const checkLogin = async (email) => {
-  if (!email) throw new Error("Email is required");
 
-  try {
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
-
-    if (rows.length > 0) {
-      return { exists: true, user: rows[0] };
-    } else {
-      return { exists: false };
-    }
-  } catch (err) {
-    console.error("Database error:", err);
-    throw err;
+  if (existing.length > 0) {
+    return { exists: true };
   }
+
+  const hashed = await bcrypt.hash(password, 10);
+
+  const [result] = await db.query(
+    "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+    [name, email, hashed]
+  );
+
+  return { exists: false, id: result.insertId };
+};
+
+/* -------- LOGIN (DB) -------- */
+export const checkLogin = async (email) => {
+  console.log("LOGIN DB CONFIG:", {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    db: process.env.DB_NAME,
+    ssl: process.env.DB_SSL
+  });
+
+  const [rows] = await db.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email]
+  );
+
+  return rows.length > 0
+    ? { exists: true, user: rows[0] }
+    : { exists: false };
 };
 
