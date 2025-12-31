@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js'
 import errorHandler from './middleware/error.js'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './swagger.js'
+import pool from "./config/db.js";
 dotenv.config()
 const PORT = process.env.PORT || 9000;
 const app = express();
