@@ -8,7 +8,10 @@ const privateKey = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, "\n");
 if (!privateKey) {
   console.error("❌ JWT_PRIVATE_KEY is missing");
 }
-
+console.log("PRIVATE KEY CHECK >>>");
+console.log("starts with:", privateKey?.split("\n")[0]);
+console.log("ends with:", privateKey?.split("\n").slice(-1)[0]);
+console.log("length:", privateKey?.length);
 /* -------- Generate Token (SIGN) -------- */
 const generateToken = (user) => {
   return jwt.sign(

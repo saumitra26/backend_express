@@ -12,6 +12,7 @@ if (existing.length > 0)
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
+  console.log("🔐 HASHED PASSWORD:", hashedPassword);
   const [result] = await db.query(
     "INSERT INTO users(name, email, password) VALUES(?, ?, ?)",
     [name, email, hashedPassword]
