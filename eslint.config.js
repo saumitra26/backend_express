@@ -8,14 +8,22 @@ export default defineConfig([
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: { globals: globals.node },
-    
+    rules: {
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
   {
     files: ["tests/**/*.js"],
     languageOptions: {
       globals: {
-        ...globals.jest,   // enable describe / it / expect
-      }
-    }
-  }
+        ...globals.jest, // enable describe / it / expect
+      },
+    },
+  },
 ]);
