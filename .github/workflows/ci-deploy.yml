@@ -1,8 +1,8 @@
-name: CI / Deploy to Render
+name: CI Only
 
 on:
   push:
-    branches: ["main", "feature/*"]
+    branches: ["main", "feature/*", "production"]
   pull_request:
     branches: ["main"]
 
@@ -11,13 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install dependencies
         run: npm ci
+
       - name: Lint
-        run: npm run lint
+        run: npm run lint   
+
       - name: Run tests
         run: npm test
-
+  deploy:
+    needs: ci
+    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger render deploy
+        run: curl -X POST "$RENDER_DEPLOY_HOOK"
+        env: 
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
