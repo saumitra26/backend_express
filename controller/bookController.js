@@ -1,5 +1,4 @@
 import {
-  findAllBooks,
   findBookById,
   addNewBook,
   updateBookInfo,
@@ -132,7 +131,7 @@ export const getBooks = async (req, res, next) => {
     }
     return res.status(200).json({
       message: "Book found",
-      message: "Books found",
+     
       page,
       limit,
       count: books.length,

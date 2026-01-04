@@ -1,32 +1,36 @@
-import path from "path";
-import { fileURLToPath } from "url";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import fs from "fs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const public_key = fs.readFileSync(
-  path.join(__dirname, "../config/keys/public.key"),
-  "utf8"
-);
+/* Load PUBLIC key (used for verification only) */
+const publicKey = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, "\n");
 
+if (!publicKey) {
+  console.error("❌ JWT_PUBLIC_KEY is missing");
+}
+
+/* -------- PROTECT (Verify Token) -------- */
 export const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer "))
-      return res.status(401).json({ message: "Not authorized , no token" });
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized, no token" });
+    }
+
     const token = authHeader.split(" ")[1];
-    console.log("token1", token);
-    const decode = jwt.verify(token, public_key, { algorithms: ["RS256"] });
-    console.log("decode", decode);
-    req.user = decode;
+
+    const decoded = jwt.verify(token, publicKey, {
+      algorithms: ["RS256"],
+    });
+
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);
     res.status(403).json({ message: "Invalid or expired token" });
   }
 };
+
+/* -------- AUTHORIZE BY ROLE -------- */
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

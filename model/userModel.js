@@ -7,11 +7,12 @@ export const addUser = async (user) => {
   const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [
     email,
   ]);
-  if (existing.length > 0)
-    return res.status(400).json({ message: "Email already exists" });
+if (existing.length > 0)
+  return { exists: true };
 
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
+  console.log("🔐 HASHED PASSWORD:", hashedPassword);
   const [result] = await db.query(
     "INSERT INTO users(name, email, password) VALUES(?, ?, ?)",
     [name, email, hashedPassword]

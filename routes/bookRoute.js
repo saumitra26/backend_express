@@ -100,6 +100,7 @@ router.use(protect, authorize("admin", "user"));
  *         description: No books found
  */
 router.get("/", getBooks);
+
 /**
  * @swagger
  * /api/books/{id}:
