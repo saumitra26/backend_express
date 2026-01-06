@@ -1,22 +1,17 @@
-# -------- Base image --------
-FROM node:20-alpine AS base
-
-WORKDIR /app
-
-# Copy dependency manifests first (better cache)
-COPY package*.json ./
-
-# Install only production deps in the image
-RUN npm ci --omit=dev
-
-# Copy the rest of the project
+# Development
+FROM base AS development
+RUN npm ci
 COPY . .
-
-# Environment hints
-ENV NODE_ENV=production
-
-# Railway injects PORT, but exposing 9000 is fine
+RUN chown -R node:node /app
+USER node
 EXPOSE 9000
+CMD ["npm", "run", "dev"]
 
-# Start app
+# Production
+FROM base AS production
+RUN npm ci --omit=dev
+COPY . .
+RUN chown -R node:node /app
+USER node
+EXPOSE 9000
 CMD ["npm", "start"]

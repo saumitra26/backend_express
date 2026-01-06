@@ -1,8 +1,8 @@
-name: CI Only
+name: CI/CD (Docker + Render)
 
 on:
   push:
-    branches: ["main", "feature/*", "docker"]
+    branches: ["main", "feature/*", "production"]
   pull_request:
     branches: ["main"]
 
@@ -12,20 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: docker build -t book-api .
+      # Build development stage (includes dev deps)
+      - name: Build CI image
+        run: docker build --target development -t book-api-ci .
 
       - name: Lint
-        run: docker run --rm book-api npm run lint
+        run: docker run --rm book-api-ci npm run lint
 
       - name: Test
-        run: docker run --rm book-api npm test
+        run: docker run --rm book-api-ci npm test
+
   deploy:
     needs: ci
-    if: github.ref == 'refs/heads/docker' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger render deploy
+      - name: Trigger Render deploy
         run: curl -X POST "$RENDER_DEPLOY_HOOK"
-        env: 
+        env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
