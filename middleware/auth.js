@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 /* Load PUBLIC key (used for verification only) */
-const publicKey = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, "\n");
+const publicKey  = Buffer.from(process.env.JWT_PUBLIC_KEY_B64, "base64").toString("utf8");
 
 if (!publicKey) {
   console.error("❌ JWT_PUBLIC_KEY is missing");

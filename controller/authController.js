@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 /* Load PRIVATE key (used for signing tokens) */
-const privateKey = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, "\n");
+const privateKey = Buffer.from(process.env.JWT_PRIVATE_KEY_B64, "base64").toString("utf8");
 
 if (!privateKey) {
   console.error("❌ JWT_PRIVATE_KEY is missing");

@@ -2,7 +2,7 @@ name: CI Only
 
 on:
   push:
-    branches: ["main", "feature/*", "production"]
+    branches: ["main", "feature/*", "docker"]
   pull_request:
     branches: ["main"]
 
@@ -12,21 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Build image
+        run: docker build -t book-api .
 
       - name: Lint
-        run: npm run lint   
+        run: docker run --rm book-api npm run lint
 
-      - name: Run tests
-        run: npm test
+      - name: Test
+        run: docker run --rm book-api npm test
   deploy:
     needs: ci
-    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/docker' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger render deploy
